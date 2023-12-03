@@ -1,2 +1,0 @@
-# textMEMO_causal_analysis_by_python
-つくりながら学ぶ！pythonによる因果分析の写経とメモ
