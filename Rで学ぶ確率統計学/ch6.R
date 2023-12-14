@@ -77,4 +77,48 @@ cohen.d(x, y)
 # 効果量は0.5。バラつきを考慮した上での差。
 
 
+# 信頼区間の変化
+plot(c(0, n), c(50, 90), type="n")
+
+x <- read.csv("csv/blood pressure.csv")[ , "diastolic.blood.pressure"]
+x
+n = length(x)
+y1 <- y2 <- numeric(n)
+for ( i in 3:n){
+  y1[i] <- t.test(x[1:i])$conf.int[1]
+  y2[i] <- t.test(x[1:i])$conf.int[2]
+  segments(i, y1[i], i, y2[i])
+}
+
+# Welthの検定
+x1 <- c(35, 29, 29, 28, 27, 26, 24, 23, 17, 14)
+x2 <- c(19, 19, 16, 15, 15, 14, 14, 13, 12, 10)
+t.test(x1, x2)
+
+# data:  x1 and x2
+# t = 4.9333, df = 12.696, p-value = 0.000293
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   5.890717 15.109283
+# sample estimates:
+#   mean of x mean of y 
+# 25.2      14.7 
+# 結果:有意差あり
+
+# sleepの検定
+head(sleep)
+length(sleep)
+x1 <- sleep[ , "extra"][1:10]
+x2 <- sleep[ , "extra"][11:20]
+t.test(x1, x2, paired = TRUE, alternative = "less")
+# 伸ばす効果あり
+
+# 信頼区間にどれぐらい入るかのシミュレーション
+count <- 0
+for (i in 1:1000){
+  x <- rnorm(10, 50, 10)
+  count <- count + (t.test(x, mu = 50)$p.value < 0.05)
+}
+print(count)
+
 
