@@ -120,5 +120,6 @@ for (i in 1:1000){
   count <- count + (t.test(x, mu = 50)$p.value < 0.05)
 }
 print(count)
-
+# [1] 49
+# 1,000回中49回であり、おおよそ5 %
 
