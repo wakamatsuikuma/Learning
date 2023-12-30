@@ -430,7 +430,92 @@ summary(res)
 # 有意であり、補習の効果は11点上昇
 
 # ch13
+# 初潮年齢の分析
+# install.packages("MASS")
+# library("MASS")
+head(menarche)
+nrow(menarche)
+age <- menarche$Age
+total <- menarche$Total
+Menarche <- menarche$Menarche
+ratio <- Menarche / total
+# 回帰分析
+reg <- lm(formula = ratio ~ age)
+summary(reg)
+plot(age, ratio)
+abline(reg)
+# ロジスティック回帰
+nums <- cbind(Menarche, total - Menarche)
+logistics <- glm(family = binomial(link = "logit"), formula = nums ~ age)
+summary(logistics)
+plot(age, ratio)
+abline(reg)
+lines(age, logistics$fitted, type = "l")
 
+# mtcarsの分析
+head(mtcars)
+nrow(mtcars)
+cols <- c("mpg", "vs")
+subdata <- mtcars[ , cols]
+subdata
 
+# 回帰分析
+logistics <- glm(data = subdata, family = binomial(link = "logit"),
+                 formula = vs ~ mpg)
+summary(logistics)
+exp(coef(logistics))
+probit <- glm(data = subdata, family = binomial(link = "probit"),
+                   formula = vs ~ mpg)
+summary(probit)
+exp(coef(probit))
+AIC(logistics, probit) # わずかにプロビット回帰の方が当てはまりが良い
+
+plot(mtcars$mpg, mtcars$vs)
+curve(predict(logistics, data.frame(mpg = x), type = "response"), add = TRUE)
+curve(predict(probit, data.frame(mpg = x), type = "response"), add = TRUE, type = "o")
+
+# タイタニックデータの回帰分析
+TitanicSurvival
+titanic <- glm(data = TitanicSurvival, family = binomial(link = "logit"),
+               formula = survived ~ passengerClass + sex + age)
+titanic_cross <- glm(data = TitanicSurvival, family = binomial(link = "logit"),
+               formula = survived ~ passengerClass + sex + age + sex:age)
+
+summary(titanic)
+summary(titanic_cross)
+AIC(titanic, titanic_cross)
+exp(coef(titanic_cross))
+# 交互作用項を入れることで改善。また男性で年齢が高くなると生存率が低くなることがわかる。
 
 # ch14
+data <- read.csv("csv/British Doctors.csv")
+data
+Deaths <- data$deaths
+Pym <- data$pym
+deathrate <- as.integer(Deaths / Pym *100000)
+smkdummy <- c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0)
+agecat <- c(1:5, 1:5)
+res1 <- glm(family = poisson(link = "log"), 
+            formula = deathrate ~ smkdummy*agecat + I(agecat^2))
+res2 <- glm(family = poisson(link = "log"), 
+            formula = deathrate ~ smkdummy*agecat)
+summary(res1)
+summary(res2) 
+# 過分散の程度が大きい。
+# 定数項が大きくなっており、年齢の一次式で回帰することが適さないことを示す
+
+res3 <- glm(family = poisson(link = "log"), 
+            formula = deathrate ~ smkdummy + agecat + I(agecat^2))
+summary(res3)
+# res1とres2の間くらいのモデル
+# 年齢と喫煙が、それぞれ独立でなく、相互に死亡率に大きく関係していることがわかる
+
+AIC(res1, res2, res3)
+# res1が一番当てはまりが良い
+
+exp(coef(res1))
+exp(coef(res2))
+exp(coef(res3))
+# 喫煙によるリスクは約4倍
+
+# END
